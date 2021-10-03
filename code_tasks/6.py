@@ -3,6 +3,7 @@ from http.server import BaseHTTPRequestHandler
 from helpers import http_server
 
 
+
 # urllib3 for url parse
 
 
@@ -11,13 +12,20 @@ class PasswordHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         print('Get post received')
         self.send_response(200)
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-type', 'text/html')
         self.end_headers()
         content_len = int(self.headers.get('Content-Length'))
         post_body = self.rfile.read(content_len)
+        try:
+            db_api_resp = db_mock_with_exception(post_body)
+            self.wfile.write(b'200 OK')
 
-        db_api_resp = db_mock_with_exception(post_body)
-        self.wfile.write(db_api_resp.encode())
+        except:
+            self.send_response(500)
+            # self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            return
+
         return
 
 
